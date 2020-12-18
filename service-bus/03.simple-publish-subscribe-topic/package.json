@@ -1,0 +1,18 @@
+{
+  "name": "03.simple-publish-subscribe-topic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "receive:S1": "node src/receivefromsubscription.js S1",
+    "receive:S2": "node src/receivefromsubscription.js S2",
+    "receive:S3": "node src/receivefromsubscription.js S3",
+    "send": "node src/sendtotopic.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@azure/service-bus": "^7.0.0"
+  }
+}

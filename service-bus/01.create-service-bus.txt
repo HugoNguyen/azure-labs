@@ -1,0 +1,95 @@
+RG=az204-service-bus
+LOC=southeastasia
+
+# create group
+az group create --name $RG --location $LOC
+
+# create service bus, namespace
+NS=bus-ns-$RANDOM
+az servicebus namespace create --resource-group $RG --name $NS --location $LOC
+
+# get the primary connection string for the namespace
+az servicebus namespace authorization-rule keys list \
+	--resource-group $RG \
+	--namespace-name $NS \
+	--name RootManageSharedAccessKey \
+	--query primaryConnectionString \
+	--output tsv
+	
+# create a queue
+QUEUE_NAME=first-simple-queue
+az servicebus queue create \
+	--resource-group $RG \
+	--namespace-name $NS \
+	--name $QUEUE_NAME
+	
+	
+# create a topic, and subscriptions for it
+TOPIC_NAME=first-simple-topic
+S1=S1
+S2=S2
+S3=S3
+
+az servicebus topic create \
+	--resource-group $RG \
+	--namespace-name $NS \
+	--name $TOPIC_NAME
+
+## first subscription
+az servicebus topic subscription create \
+	--resource-group $RG \
+	--namespace-name $NS \
+	--topic-name $TOPIC_NAME \
+	--name $S1
+
+## second subscription
+az servicebus topic subscription create \
+	--resource-group $RG \
+	--namespace-name $NS \
+	--topic-name $TOPIC_NAME \
+	--name $S2
+
+## third subscription
+az servicebus topic subscription create \
+	--resource-group $RG \
+	--namespace-name $NS \
+	--topic-name $TOPIC_NAME \
+	--name $S3
+	
+## S1 Subscription, filter in (Store1, Store2, Store3)
+az servicebus topic subscription rule create \
+	--resource-group $RG \
+	--namespace-name $NS \
+	--topic-name $TOPIC_NAME \
+	--subscription-name $S1 \
+	--name MyFilter \
+	--filter-sql-expression "StoreId IN ('Store1','Store2','Store3')"
+	
+## S2 Subscription, filter in (Store1, Store2, Store3)
+az servicebus topic subscription rule create \
+	--resource-group $RG \
+	--namespace-name $NS \
+	--topic-name $TOPIC_NAME \
+	--subscription-name $S2 \
+	--name MySecondFilter \
+	--filter-sql-expression "StoreId = 'Store4'"
+	
+## S3 Subscription, filter in (Store1, Store2, Store3)
+az servicebus topic subscription rule create \
+	--resource-group $RG \
+	--namespace-name $NS \
+	--topic-name $TOPIC_NAME \
+	--subscription-name $S3 \
+	--name MyThirdFilter \
+	--filter-sql-expression "StoreId NOT IN ('Store1','Store2','Store3', 'Store4')"
+
+# create a queue, with session enable
+SES_QUEUE_NAME=simple-session-queue
+az servicebus queue create \
+	--resource-group $RG \
+	--namespace-name $NS \
+	--name $SES_QUEUE_NAME \
+	--enable-session true
+	
+
+	
